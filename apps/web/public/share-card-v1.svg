@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f6faf4"/>
+      <stop offset="1" stop-color="#e7f2e7"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#f9fcf8"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="#173f2c" flood-opacity="0.13"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="630" fill="url(#background)"/>
+  <circle cx="1025" cy="106" r="310" fill="#d3e9d5"/>
+  <circle cx="1120" cy="535" r="245" fill="#c5e0cb" opacity="0.7"/>
+  <circle cx="154" cy="588" r="205" fill="#edf5df" opacity="0.8"/>
+
+  <rect x="74" y="64" width="64" height="64" rx="17" fill="#185b3a"/>
+  <path d="M88 101h12l8-20 10 31 7-17h9" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="156" y="113" fill="#173f2d" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" font-size="44" font-weight="800">日日花</text>
+
+  <text x="73" y="240" fill="#153d2b" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" font-size="63" font-weight="800" letter-spacing="-2">今天還能花多少？</text>
+  <text x="76" y="310" fill="#2d6448" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" font-size="34" font-weight="600">每天的可用預算，一眼就知道。</text>
+  <text x="76" y="397" fill="#557363" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" font-size="27">把月薪、固定支出與存款</text>
+  <text x="76" y="438" fill="#557363" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" font-size="27">整理成安心運用的每一天。</text>
+  <rect x="75" y="514" width="252" height="52" rx="26" fill="#e0eee2"/>
+  <circle cx="103" cy="540" r="6" fill="#2f9a63"/>
+  <text x="124" y="549" fill="#225c3e" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" font-size="23" font-weight="650">動態預算記帳</text>
+
+  <g filter="url(#shadow)">
+    <rect x="803" y="114" width="312" height="413" rx="28" fill="url(#card)"/>
+    <rect x="803" y="114" width="312" height="413" rx="28" fill="none" stroke="#d9e8dc" stroke-width="2"/>
+  </g>
+  <circle cx="855" cy="174" r="19" fill="#e2f2e5"/>
+  <path d="M844 174h7l5-10 5 19 4-9h5" fill="none" stroke="#23764b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="886" y="181" fill="#244934" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" font-size="23" font-weight="700">今日可花</text>
+  <text x="843" y="285" fill="#145334" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" font-size="47" font-weight="800">NT$ 1,250</text>
+  <text x="845" y="321" fill="#8b9f91" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" font-size="15">示意畫面</text>
+  <line x1="844" y1="348" x2="1074" y2="348" stroke="#e5eee7" stroke-width="2"/>
+  <text x="844" y="391" fill="#557262" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" font-size="19">本期預算</text>
+  <rect x="845" y="407" width="230" height="13" rx="7" fill="#e3f0e5"/>
+  <rect x="845" y="407" width="145" height="13" rx="7" fill="#62aa77"/>
+  <circle cx="860" cy="466" r="7" fill="#75b58a"/>
+  <circle cx="889" cy="466" r="7" fill="#afdab5"/>
+  <circle cx="918" cy="466" r="7" fill="#d5ead8"/>
+  <text x="958" y="473" fill="#62806d" font-family="Noto Sans TC, Microsoft JhengHei, sans-serif" font-size="17">過好每一天</text>
+</svg>
