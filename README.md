@@ -2,7 +2,7 @@
 
 React + TypeScript + Vite 前端、Cloudflare Worker API、純 TypeScript 預算 Engine、Google 直接登入與 Supabase PostgreSQL。資金規則以 [TECHNICAL_DESIGN.md](TECHNICAL_DESIGN.md) 為準，開發順序見 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md)。
 
-App 版本為 **0.6.0**，以根目錄 `package.json` 的 `version` 為唯一來源。設定頁顯示版本；建置產生 `/version.json` 和 HTML `app-version` metadata，API `/health` 也回傳相同版本。後續功能更新增加次版本、修正增加修訂版本，並同步 App workspace 版本及 [CHANGELOG.md](CHANGELOG.md)。
+App 版本為 **0.6.1**，以根目錄 `package.json` 的 `version` 為唯一來源。設定頁顯示版本；建置產生 `/version.json` 和 HTML `app-version` metadata，API `/health` 也回傳相同版本。後續功能更新增加次版本、修正增加修訂版本，並同步 App workspace 版本及 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 目前可用的範圍
 
@@ -76,3 +76,7 @@ v0.3.0 發布時 55 項自動測試通過（24 Domain、29 API／認證／Postgr
 14 項前端測試、型別與完整建置通過。WebKit 以 iPhone standalone 隔離資料驗證左／右滑、垂直捲動、單列展開、鍵盤操作、編輯與刪除取消、分組與指定日期紀錄，以及額外收入入口開啟／取消；320／393／1280px 的 10 位數及舊超長金額無橫向溢位或欄位重疊。本次無資料庫 migration，未在正式帳戶寫入測試交易；實體 iOS 觸控與 VoiceOver 尚需裝置驗證。
 
 正式版本與資產檢查均通過：前端與 API 為 0.6.0、HTTP 200、JS／CSS SHA-256 一致、CORS 預檢 204、匿名摘要 401。Pages deployment 為 `d65209de`，Worker version ID 為 `619e0597-befc-4f9f-983d-0a602fe974e7`。
+
+**v0.6.1 已於 2026-10-08 部署至正式站。** 移除頂部成功操作提示及其狀態、樣式，新增／修改／刪除後仍刷新資料並關閉視窗；失敗與資料刷新錯誤提示保留。14 項前端測試與完整建置通過，WebKit iPhone 隔離流程確認新增、刪除後清單更新且無成功 banner，模擬儲存失敗仍顯示錯誤並保留表單。本次無資料庫 migration。
+
+正式版本與資產檢查均通過：前端與 API 為 0.6.1、HTTP 200、JS／CSS SHA-256 一致、CORS 預檢 204、匿名摘要 401。Pages deployment 為 `7732985b`，Worker version ID 為 `bed6e423-6147-41f9-88b1-16a08b4018a7`。

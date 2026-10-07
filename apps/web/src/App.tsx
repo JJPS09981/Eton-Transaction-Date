@@ -18,7 +18,6 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
   const [view, setView] = useState<View>("today");
   const [dialog, setDialog] = useState<"expense" | "income" | null>(null);
   const [transactionAction, setTransactionAction] = useState<{ type: "edit" | "delete"; row: TransactionView } | null>(null);
@@ -43,7 +42,7 @@ export default function App() {
   }, []);
   const expireSession = useCallback(() => {
     setToken(null); setSession(null); setData(null); setDialog(null); setTransactionAction(null); setView("today");
-    setHistoryMonth(null); setHistoryDate(null); setNotice(null); setError(null);
+    setHistoryMonth(null); setHistoryDate(null); setError(null);
   }, []);
   const reload = useCallback(async () => {
     if (!session) return;
@@ -62,10 +61,9 @@ export default function App() {
   }, [reload, busy]);
   const command = async (body: Record<string, unknown>): Promise<Record<string, unknown>> => {
     if (!session) throw new Error("請先登入");
-    setBusy(true); setError(null); setNotice(null);
+    setBusy(true); setError(null);
     try {
       const result = await sendCommand(body);
-      setNotice(result.insufficientFunds ? "已儲存；可用資金不足，實際扣款以可用金額為上限。" : result.deleted ? `已刪除交易。${Number(result.canceledInstallments) > 0 ? `已取消 ${result.canceledInstallments} 期未入帳分期。` : ""}` : "已儲存。");
       try { setData(await getDashboard()); }
       catch (caught) {
         if (caught instanceof ApiError && caught.status === 401) expireSession();
@@ -88,7 +86,6 @@ export default function App() {
   const actions = { busy, onEdit: (row: TransactionView) => setTransactionAction({ type: "edit", row }), onDelete: (row: TransactionView) => setTransactionAction({ type: "delete", row }) };
   return <Shell view={view} onView={setView}>
     {error ? <div className="banner error-message" role="alert">{error}<div><button type="button" onClick={() => void reload()}>重整</button><button type="button" onClick={() => setError(null)} aria-label="關閉錯誤">×</button></div></div> : null}
-    {notice ? <div className="banner notice-message" role="status">{notice}<button type="button" onClick={() => setNotice(null)} aria-label="關閉提示">×</button></div> : null}
     {view === "today" ? <Dashboard data={data} {...actions} onExpense={() => setDialog("expense")} onIncome={() => setDialog("income")} onViewTransactions={() => { setHistoryDate(null); setView("transactions"); }} /> : null}
     {view === "transactions" ? <RecordsView data={data} {...actions} month={historyMonth ?? today.slice(0, 7)} selectedDate={historyDate} onMonth={setHistoryMonth} onDate={setHistoryDate} onExpense={() => setDialog("expense")} /> : null}
     {view === "data" ? <DataView data={data} /> : null}
