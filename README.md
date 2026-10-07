@@ -63,3 +63,9 @@ v0.3.0 發布時 55 項自動測試通過（24 Domain、29 API／認證／Postgr
 第七版 `202610080003_fixed_income.sql` 已驗證舊資料升級不改資金並正式套用，七版 migration 一致。92 項測試（35 Domain、51 API／認證／PostgreSQL、6 Web）、完整型別與建置通過。Playwright WebKit 以 393px 與 320px 實測首次填入／略過存款、固定收入下期及立即生效、失敗同 ID 重試、當日／本期舊日期／已結算期的編輯刪除，以及存款來源退款與深色窄螢幕。瀏覽器資料使用打包的純 Domain Engine 計算，SQL 原子保存另由隔離 PostgreSQL 整合測試驗證；未在正式帳戶建立測試交易。
 
 正式版本與資產檢查均通過：前端與 API 為 0.5.0、HTTP 200、JS／CSS SHA-256 一致、CORS 預檢 204、匿名摘要 401。Pages deployment 為 `0638dd15`，Worker version ID 為 `04256069-2544-48bd-b585-7137049c4cbe`。
+
+**v0.5.1 已於 2026-10-08 部署至正式站。** 手機 PWA 使用固定頁框與獨立內容捲動區，底部導覽不隨頁面移動；以標準 standalone 媒體查詢及 iPhone 主畫面模式辨識啟用。彈窗開啟時鎖住背景、關閉後保留位置，並處理安全區與觸控裝置橫向版面。
+
+6 項前端測試與完整建置通過。WebKit 以隔離資料模擬 iPhone standalone，檢查 393×852、320×568、852×393 四分頁的頂底位置、導覽可操作性、彈窗背景鎖定與短視窗儲存；一般瀏覽器、標準 standalone 辨識、首次設定及登出解除鎖定亦通過。本次無資料庫 migration；瀏覽器模擬不等同實體 iPhone 的回彈手勢測試。
+
+正式版本與資產檢查均通過：前端與 API 為 0.5.1、HTTP 200、JS／CSS SHA-256 一致、CORS 預檢 204、匿名摘要 401。Pages deployment 為 `2c24a94d`，Worker version ID 為 `6a777af2-121b-4c65-a76f-151742f9ead9`。

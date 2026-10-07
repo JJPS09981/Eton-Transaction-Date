@@ -161,12 +161,18 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
   .balance-strip > div { padding: 0 20px; }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 720px), (max-width: 950px) and (hover: none) and (pointer: coarse) {
+  /* In an installed PWA, keep the frame still and scroll page content only. */
+  html:has(.app-shell.standalone), body:has(.app-shell.standalone) { height: 100%; overflow: hidden; overscroll-behavior: none; }
   .app-shell { display: block; }
+  .app-shell.standalone { position: fixed; inset: 0; height: 100vh; height: 100dvh; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; overflow: hidden; }
   .sidebar { display: none; }
-  .main-content { width: 100%; padding: 32px 20px 112px; }
-  .mobile-nav { position: fixed; z-index: 10; bottom: 0; left: 0; right: 0; min-height: 75px; padding: 8px 8px max(9px, env(safe-area-inset-bottom)); display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid #e6eae7; background: #fff; box-shadow: 0 -3px 18px #1d39200a; }
-  .mobile-nav button { border: 0; background: transparent; color: #89938d; display: grid; justify-items: center; align-content: center; gap: 3px; font-size: 11px; font-weight: 650; }
+  .main-content { width: 100%; padding: calc(32px + env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) 112px max(20px, env(safe-area-inset-left)); }
+  .app-shell.standalone .main-content { min-height: 0; overflow: auto; overscroll-behavior: contain; padding-bottom: 32px; }
+  .app-shell.standalone:has(dialog[open]) .main-content { overflow: hidden; }
+  .mobile-nav { position: fixed; z-index: 10; bottom: 0; left: 0; right: 0; min-height: 75px; padding: 8px max(8px, env(safe-area-inset-right)) max(9px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)); display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid #e6eae7; background: #fff; box-shadow: 0 -3px 18px #1d39200a; }
+  .app-shell.standalone .mobile-nav { position: relative; bottom: auto; left: auto; right: auto; }
+  .mobile-nav button { min-height: 50px; border: 0; background: transparent; color: #89938d; display: grid; justify-items: center; align-content: center; gap: 3px; font-size: 11px; font-weight: 650; }
   .mobile-nav button.active { color: #1b6a43; }
   .mobile-nav svg { width: 24px; height: 24px; }
   .page-heading { margin-bottom: 21px; }
@@ -196,7 +202,8 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
   .transaction-row .transaction-actions { grid-column: 1 / -1; }
   .savings-total strong { font-size: 42px; }
   .form-grid { grid-template-columns: 1fr; gap: 0; }
-  .setup-wrap { padding: 34px 20px 100px; }
+  .setup-wrap { padding: max(34px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(100px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left)); }
+  .login-page, .center-state { padding: max(25px, env(safe-area-inset-top)) max(25px, env(safe-area-inset-right)) max(25px, env(safe-area-inset-bottom)) max(25px, env(safe-area-inset-left)); }
   .setup-intro h1 { font-size: 29px; }
   .setup-progress { margin-top: 26px; }
   .setup-progress > div { gap: 6px; }
@@ -404,8 +411,8 @@ button.setting-row:hover { color: var(--accent); }
 .category-managed-body { min-width: 0; flex: 1; }
 .manage-subcategories { min-height: 44px; font-size: 12px; padding-left: 0; }
 .manager-back { min-height: 44px; margin-bottom: 16px; }
-@media (max-width: 760px) {
-  .edit-sheet.quick-sheet { top: calc(var(--visual-top,0px) + 12px); bottom: auto; margin: 0 auto; height: calc(var(--visual-height,100dvh) - 24px); max-height: calc(var(--visual-height,100dvh) - 24px); border-radius: 20px; }
+@media (max-width: 760px), (max-width: 950px) and (hover: none) and (pointer: coarse) {
+  .edit-sheet.quick-sheet { --quick-inset-top: max(12px, env(safe-area-inset-top)); top: calc(var(--visual-top,0px) + var(--quick-inset-top)); bottom: auto; margin: 0 auto; height: calc(var(--visual-height,100dvh) - var(--quick-inset-top) - 12px); max-height: calc(var(--visual-height,100dvh) - var(--quick-inset-top) - 12px); border-radius: 20px; }
   .quick-sheet .sheet-heading { padding: 16px 20px 12px; }
   .quick-scroll { padding: 8px 20px 24px; }
   .quick-footer { padding-left: 20px; padding-right: 20px; }
@@ -437,7 +444,7 @@ button.setting-row:hover { color: var(--accent); }
 :root[data-theme="dark"] .banner.error-message { background: #442d29; }
 :root[data-theme="dark"] .hero-balance { background: var(--surface); }
 
-@media (max-width: 720px) {
+@media (max-width: 720px), (max-width: 950px) and (hover: none) and (pointer: coarse) {
   .detail-page .page-heading h1 { font-size: 25px; }
   .calendar-heading h2 { font-size: 18px; }
   .calendar-day { min-height: 52px; font-size: 14px; gap: 3px; }

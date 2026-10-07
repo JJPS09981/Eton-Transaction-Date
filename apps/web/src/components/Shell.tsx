@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 
 export type View = "today" | "transactions" | "data" | "settings";
 
@@ -14,7 +14,15 @@ function NavIcon({ children }: { children: ReactNode }) {
 }
 
 export function Shell({ view, onView, children }: { view: View; onView: (view: View) => void; children: ReactNode }) {
-  return <div className="app-shell">
+  const [standalone] = useState(() =>
+    matchMedia("(display-mode: standalone)").matches ||
+    ("standalone" in navigator && navigator.standalone === true),
+  );
+  const contentRef = useRef<HTMLElement>(null);
+  useLayoutEffect(() => {
+    if (contentRef.current) contentRef.current.scrollTop = 0;
+  }, [view]);
+  return <div className={`app-shell${standalone ? " standalone" : ""}`}>
     <aside className="sidebar">
       <div className="brand">日日花</div>
       <nav aria-label="主要導覽">
@@ -23,7 +31,7 @@ export function Shell({ view, onView, children }: { view: View; onView: (view: V
         </button>)}
       </nav>
     </aside>
-    <main className="main-content">{children}</main>
+    <main ref={contentRef} className="main-content">{children}</main>
     <nav className="mobile-nav" aria-label="手機導覽">
       {items.map((item) => <button key={item.id} type="button" className={view === item.id ? "active" : ""} onClick={() => onView(item.id)} aria-current={view === item.id ? "page" : undefined}>
         <NavIcon>{item.icon}</NavIcon><span>{item.label}</span>
