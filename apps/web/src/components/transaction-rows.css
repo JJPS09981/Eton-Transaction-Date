@@ -1,0 +1,131 @@
+.transaction-swipe-list .transaction-swipe-row {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border-top: 1px solid var(--line);
+}
+.transaction-swipe-list .transaction-swipe-row > .transaction-row {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 46px 42px minmax(0, 1fr) 160px;
+  align-items: center;
+  column-gap: 14px;
+  row-gap: 0;
+  min-height: 80px;
+  padding: 13px 0;
+  margin: 0;
+  border: 0;
+  background: var(--surface);
+  color: var(--text);
+  transform: translateX(0);
+  transition: transform .18s ease-out;
+  touch-action: pan-y pinch-zoom;
+  -webkit-tap-highlight-color: transparent;
+}
+.transaction-swipe-list .is-open > .transaction-row { transform: translateX(calc(-1 * var(--transaction-actions-width))); }
+.transaction-swipe-list [data-dragging] > .transaction-row { transition: none; cursor: grabbing; user-select: none; }
+.transaction-swipe-list .transaction-row[role="button"] { cursor: pointer; }
+.transaction-swipe-list .transaction-row:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; border-radius: 7px; }
+.transaction-swipe-list .transaction-row[aria-disabled="true"] { cursor: default; }
+.transaction-swipe-list .transaction-row .transaction-date {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  grid-column: auto;
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.3;
+  font-variant-numeric: tabular-nums;
+}
+.transaction-swipe-list .transaction-date small { font-size: 11px; font-weight: 400; }
+.transaction-swipe-list .transaction-category-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+.transaction-swipe-list .transaction-category-icon svg { width: 24px; height: 24px; }
+.transaction-swipe-list .icon-shopping, .transaction-swipe-list .icon-living { background: #fff0ea; color: #c45d4b; }
+.transaction-swipe-list .icon-entertainment { background: #f1edfb; color: #7a64a8; }
+.transaction-swipe-list .icon-other, .transaction-swipe-list .icon-tag { background: var(--surface-muted); color: var(--muted); }
+:root[data-theme="dark"] .transaction-swipe-list .icon-shopping,
+:root[data-theme="dark"] .transaction-swipe-list .icon-living { background: #422c27; color: #eca996; }
+:root[data-theme="dark"] .transaction-swipe-list .icon-entertainment { background: #342d43; color: #c3b2ec; }
+.transaction-swipe-list .transaction-row .transaction-name { display: grid; gap: 4px; min-width: 0; }
+.transaction-swipe-list .transaction-name strong { font-size: 14px; line-height: 1.35; }
+.transaction-swipe-list .transaction-name span { font-size: 12px; line-height: 1.35; color: var(--muted); }
+.transaction-swipe-list .transaction-row .transaction-amount {
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.45;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.transaction-swipe-list .transaction-amount small { font-size: 11px; color: #b45649; }
+:root[data-theme="dark"] .transaction-swipe-list .transaction-amount small { color: #f1aa9f; }
+.transaction-swipe-list .transaction-swipe-row > .transaction-actions {
+  position: absolute;
+  z-index: 0;
+  inset: 0 0 0 auto;
+  display: flex;
+  width: var(--transaction-actions-width);
+  gap: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.transaction-swipe-list .is-open > .transaction-actions,
+.transaction-swipe-list [data-dragging] > .transaction-actions { visibility: visible; }
+.transaction-swipe-list .is-open > .transaction-actions { pointer-events: auto; }
+.transaction-swipe-list .transaction-actions button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 72px;
+  min-height: 44px;
+  padding: 10px 4px;
+  border: 0;
+  border-radius: 0;
+  font-size: 12px;
+  font-weight: 650;
+}
+.transaction-swipe-list .transaction-actions .edit-action,
+.transaction-swipe-list .transaction-actions .edit-action:hover { background: #f2c44d; color: #342809; }
+.transaction-swipe-list .transaction-actions .delete-action,
+.transaction-swipe-list .transaction-actions .delete-action:hover { background: #c94743; color: #fff; }
+.transaction-swipe-list .transaction-actions button:disabled { opacity: .6; }
+.transaction-swipe-list .transaction-actions button:focus-visible { outline: 2px solid currentColor; outline-offset: -4px; }
+.transaction-swipe-list .transaction-actions svg { width: 21px; height: 21px; }
+.history-group .transaction-swipe-list .transaction-swipe-row > .transaction-row { grid-template-columns: 42px minmax(0, 1fr) 160px; }
+.history-group .transaction-swipe-list .transaction-row .transaction-date { display: none; }
+@media (max-width: 600px) {
+  .transaction-swipe-list .transaction-swipe-row > .transaction-row {
+    grid-template-columns: 39px 38px minmax(0, 1fr) clamp(88px, 29vw, 130px);
+    column-gap: 10px;
+    min-height: 60px;
+    padding-block: 8px;
+  }
+  .transaction-swipe-list .transaction-category-icon { width: 38px; height: 38px; }
+  .transaction-swipe-list .transaction-category-icon svg { width: 22px; height: 22px; }
+  .transaction-swipe-list .transaction-row .transaction-amount { font-size: 13px; }
+  .history-group .transaction-swipe-list .transaction-swipe-row > .transaction-row { grid-template-columns: 38px minmax(0, 1fr) clamp(88px, 29vw, 130px); }
+}
+@media (max-width: 350px) {
+  .transaction-swipe-list .transaction-swipe-row > .transaction-row { column-gap: 8px; }
+  .transaction-swipe-list .transaction-name strong { font-size: 13px; }
+  .transaction-swipe-list .transaction-name span { font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .transaction-swipe-list .transaction-swipe-row > .transaction-row { transition: none; }
+}

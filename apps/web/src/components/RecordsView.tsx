@@ -7,7 +7,7 @@ function moveMonth(month: string, offset: number) {
   const date = new Date(Date.UTC(Number(month.slice(0, 4)), Number(month.slice(5, 7)) - 1 + offset, 1));
   return date.toISOString().slice(0, 7);
 }
-function HistoryGroups({ rows, today, emptyMessage, ...actions }: { rows: TransactionView[]; today: string; emptyMessage: string } & TransactionActions) {
+function HistoryGroups({ rows, today, emptyMessage, categories, ...actions }: { rows: TransactionView[]; today: string; emptyMessage: string; categories?: DashboardData["categories"] } & TransactionActions) {
   const groups = new Map<string, TransactionView[]>();
   for (const row of rows) {
     const group = groups.get(row.transaction_date);
@@ -15,7 +15,7 @@ function HistoryGroups({ rows, today, emptyMessage, ...actions }: { rows: Transa
   }
   if (!rows.length) return <p className="empty-note">{emptyMessage}</p>;
   return <>{Array.from(groups, ([date, entries]) => <section className="history-group" key={date}>
-    <h3>{shortDate(date)}{date === today ? <span>今天</span> : null}</h3><TransactionRows rows={entries} {...actions} />
+    <h3>{shortDate(date)}{date === today ? <span>今天</span> : null}</h3><TransactionRows rows={entries} categories={categories} {...actions} />
   </section>)}</>;
 }
 
@@ -78,7 +78,7 @@ export function RecordsView({ data, month, selectedDate, onMonth, onDate, onExpe
       {kind === "expense" && selectedDate && history.loaded ? history.settlement ? <p className="settlement-note">
         {history.settlement.pool_amount === null ? "本日已結算，入池金額未留存。" : "本日已結算 " + money(history.settlement.pool_amount) + " 進存款池。"}
       </p> : <p className="muted-note">{selectedDate >= today ? "本日尚未結算。" : "這一天沒有結算紀錄。"}</p> : null}
-      {!history.loaded && !history.error ? <p className="empty-note" role="status">正在讀取{noun}…</p> : history.loaded ? selectedDate ? <TransactionRows rows={history.rows} onEdit={onEdit} onDelete={onDelete} busy={busy} emptyMessage={"這一天沒有記錄" + noun + "。"} /> : <HistoryGroups rows={history.rows} today={today} onEdit={onEdit} onDelete={onDelete} busy={busy} emptyMessage={"還沒有" + noun + "紀錄。"} /> : null}
+      {!history.loaded && !history.error ? <p className="empty-note" role="status">正在讀取{noun}…</p> : history.loaded ? selectedDate ? <TransactionRows rows={history.rows} categories={data.categories} onEdit={onEdit} onDelete={onDelete} busy={busy} emptyMessage={"這一天沒有記錄" + noun + "。"} /> : <HistoryGroups rows={history.rows} categories={data.categories} today={today} onEdit={onEdit} onDelete={onDelete} busy={busy} emptyMessage={"還沒有" + noun + "紀錄。"} /> : null}
       {history.error ? <p className="error-message" role="alert">{history.error}</p> : null}
       {history.cursor || history.error ? <button type="button" className="secondary-button history-more" disabled={history.loading} onClick={() => void history.more()}>{history.loading ? "載入中…" : history.error ? "重試" : "載入更多"}</button> : null}
     </section>

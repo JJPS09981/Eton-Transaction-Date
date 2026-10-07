@@ -13,11 +13,13 @@ function CategoryDetail({
   category,
   summary,
   revision,
+  categories,
   onBack,
 }: {
   category: SummaryData["categories"][number];
   summary: SummaryData;
   revision: number;
+  categories?: DashboardData["categories"];
   onBack: () => void;
 }) {
   const history = useHistory(
@@ -44,6 +46,7 @@ function CategoryDetail({
       ) : history.loaded ? (
         <TransactionRows
           rows={history.rows}
+          categories={categories}
           emptyMessage="本期沒有這個分類的花費。"
         />
       ) : null}
@@ -204,6 +207,7 @@ export function DataView({ data }: { data: DashboardData }) {
           category={category}
           summary={summary}
           revision={revision}
+          categories={data.categories}
           onBack={() => setSelected(null)}
         />
       ) : (
