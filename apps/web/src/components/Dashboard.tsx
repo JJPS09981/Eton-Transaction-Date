@@ -41,11 +41,10 @@ export function Dashboard({ data, onExpense, onIncome, onViewTransactions, onEdi
     </section>
     <section className="balance-strip" aria-label="資金摘要">
       <div><span>本期存款池</span><strong>{money(state.P)}</strong><small>每日結餘累積於此</small></div>
-      <div><span>累積存款</span><strong>{money(state.S)}</strong><small>可支應本期超支</small></div>
-      <div><span>本期生活預算</span><strong>{money(cycle.lifestyle_budget)}</strong><small>扣除固定項目後</small></div>
+      <div><span>本月可用預算</span><strong>{money(cycle.lifestyle_budget)}</strong><small>扣除固定項目後</small></div>
     </section>
     <section className="list-panel dashboard-transactions">
-      <div className="section-title"><h2>今日花費</h2><button className="inline-link" type="button" onClick={onViewTransactions}>查看全部 <span aria-hidden="true">›</span></button></div>
+      <div className="section-title"><h2>今日花費</h2><button className="inline-link" type="button" onClick={onViewTransactions}>查看歷史紀錄 <span aria-hidden="true">›</span></button></div>
       <TransactionRows rows={expenses} categories={data.categories} onEdit={onEdit} onDelete={onDelete} busy={busy} emptyMessage="今天還沒有花費。記下第一筆支出後會顯示在這裡。" />
     </section>
   </div>;

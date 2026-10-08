@@ -48,7 +48,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .text-button { display: flex; align-items: center; justify-content: space-between; }
 .text-button:hover, .secondary-button:hover { background: #f7fbf8; }
 .text-button span, .inline-link span { font-size: 24px; line-height: 0; }
-.balance-strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid #e3e9e5; border-radius: 10px; margin: 16px 0 24px; padding: 23px 0; }
+.balance-strip { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border: 1px solid #e3e9e5; border-radius: 10px; margin: 16px 0 24px; padding: 23px 0; }
 .balance-strip > div { padding: 0 34px; display: grid; gap: 7px; }
 .balance-strip > div + div { border-left: 1px solid #e3e9e5; }
 .balance-strip span { font-size: 16px; font-weight: 650; }
@@ -195,7 +195,6 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
   .hero-actions .text-button { border: 0; min-height: 35px; justify-content: center; gap: 7px; }
   .balance-strip { margin: 24px 0 33px; padding: 18px 0; grid-template-columns: repeat(2, 1fr); }
   .balance-strip > div { padding: 0 14px; }
-  .balance-strip > div:nth-child(3) { display: none; }
   .balance-strip span { font-size: 13px; }
   .balance-strip strong { font-size: clamp(18px, 5vw, 24px); }
   .balance-strip small { display: none; }
