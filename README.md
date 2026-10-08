@@ -2,7 +2,7 @@
 
 React + TypeScript + Vite 前端、Cloudflare Worker API、純 TypeScript 預算 Engine、Google 直接登入與 Supabase PostgreSQL。資金規則以 [TECHNICAL_DESIGN.md](TECHNICAL_DESIGN.md) 為準，開發順序見 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md)。
 
-App 版本為 **0.6.1**，以根目錄 `package.json` 的 `version` 為唯一來源。設定頁顯示版本；建置產生 `/version.json` 和 HTML `app-version` metadata，API `/health` 也回傳相同版本。後續功能更新增加次版本、修正增加修訂版本，並同步 App workspace 版本及 [CHANGELOG.md](CHANGELOG.md)。
+App 版本為 **0.6.2**，以根目錄 `package.json` 的 `version` 為唯一來源。設定頁顯示版本；建置產生 `/version.json` 和 HTML `app-version` metadata，API `/health` 也回傳相同版本。後續功能更新增加次版本、修正增加修訂版本，並同步 App workspace 版本及 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 目前可用的範圍
 

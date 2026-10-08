@@ -5,6 +5,7 @@ import { useCommandDraft } from "../lib/command";
 import type { Appearance } from "../lib/appearance";
 import { APP_VERSION } from "../lib/version";
 import { Sheet } from "./Sheet";
+import { FixedExpensePicker, type FixedExpenseInput } from "./FixedExpensePicker";
 
 function SavingsEditor({ data, busy, onSubmit, onClose }: EditorProps) {
   const [target, setTarget] = useState(data.state!.S);
@@ -55,10 +56,10 @@ function FixedIncomeEditor({ item, data, busy, onSubmit, onClose }: EditorProps 
   </Sheet>;
 }
 
-function FixedEditor({ item, data, busy, onSubmit, onClose }: EditorProps & { item: FixedItem | null }) {
-  const [name, setName] = useState(item?.name ?? "");
+function FixedEditor({ item, preset, data, busy, onSubmit, onClose, onSaved }: EditorProps & { item: FixedItem | null; preset?: FixedExpenseInput; onSaved: () => void }) {
+  const [name, setName] = useState(item?.name ?? preset?.name ?? "");
   const [amount, setAmount] = useState(item?.amount ?? "");
-  const [category, setCategory] = useState(item?.category ?? "");
+  const [category, setCategory] = useState(item?.category ?? preset?.category ?? "");
   const [frequency, setFrequency] = useState<"monthly" | "annual">(item?.frequency ?? "monthly");
   const [dueMonth, setDueMonth] = useState(item?.due_month ?? Number(data.state!.today.slice(5, 7)));
   const [active, setActive] = useState(item?.active ?? true);
@@ -72,7 +73,7 @@ function FixedEditor({ item, data, busy, onSubmit, onClose }: EditorProps & { it
     try {
       await onSubmit(draft.build({ type: "SaveFixedExpense", ...(item ? { itemId: item.id } : {}), name: name.trim(), amount,
         ...(category ? { category } : {}), frequency, ...(frequency === "annual" ? { dueMonth } : {}), active, apply }));
-      draft.reset(); onClose();
+      draft.reset(); onSaved();
     } catch (caught) { setError(caught instanceof Error ? caught.message : "儲存失敗"); }
   }
   return <Sheet title={item ? "編輯固定支出" : "新增固定支出"} busy={busy} onClose={onClose}>
@@ -97,7 +98,7 @@ function FixedEditor({ item, data, busy, onSubmit, onClose }: EditorProps & { it
   </Sheet>;
 }
 
-type SettingsDialog = { type: "savings" | "categories" | "fixed-list" | "fixed-income" } | { type: "fixed-edit"; item: FixedItem | null };
+type SettingsDialog = { type: "savings" | "categories" | "fixed-list" | "fixed-income" | "fixed-add" } | { type: "fixed-edit"; item: FixedItem | null; preset?: FixedExpenseInput };
 export function SettingsView({ data, busy, appearance, onAppearance, onSubmit, onSignOut }: {
   data: DashboardData; busy: boolean; appearance: Appearance; onAppearance: (value: Appearance) => void;
   onSubmit: CommandHandler; onSignOut: () => void;
@@ -136,8 +137,13 @@ export function SettingsView({ data, busy, appearance, onAppearance, onSubmit, o
     {dialog?.type === "fixed-list" ? <Sheet title="固定支出" busy={busy} onClose={() => setDialog(null)}>
       <p className="sheet-description">點項目編輯。每次修改預設下一期生效，也可選擇立即套用。</p>
       <div className="fixed-items-list">{fixed.length === 0 ? <p className="empty-note">還沒有固定支出。新增房租、帳單或訂閱項目。</p> : fixed.map((item) => <button className={item.active ? "setting-row" : "setting-row inactive"} type="button" key={item.id} disabled={busy} onClick={() => setDialog({ type: "fixed-edit", item })}><span>{item.name}<small>{item.active ? item.frequency === "annual" ? "年繳 · " + item.due_month + " 月" : "月繳" : "已停用"}</small></span><strong>{money(item.amount)} <i>›</i></strong></button>)}</div>
-      <button className="secondary-button sheet-save" type="button" onClick={() => setDialog({ type: "fixed-edit", item: null })}>＋ 新增固定支出</button>
+      <button className="secondary-button sheet-save" type="button" disabled={busy} onClick={() => setDialog({ type: "fixed-add" })}>＋ 新增固定支出</button>
     </Sheet> : null}
-    {dialog?.type === "fixed-edit" ? <FixedEditor key={dialog.item?.id ?? "new"} {...editorProps} item={dialog.item} onClose={() => setDialog({ type: "fixed-list" })} /> : null}
+    {dialog?.type === "fixed-add" ? <Sheet title="新增固定支出" className="fixed-expense-picker-sheet" busy={busy} onClose={() => setDialog({ type: "fixed-list" })}>
+      <p className="sheet-description">選擇常見項目，再填入金額與繳費頻率；也可以在各分類新增其他項目。</p>
+      <FixedExpensePicker disabled={busy} onSelect={(preset) => setDialog({ type: "fixed-edit", item: null, preset })} />
+    </Sheet> : null}
+    {dialog?.type === "fixed-edit" ? <FixedEditor key={dialog.item?.id ?? dialog.preset?.id ?? "new"} {...editorProps} item={dialog.item} preset={dialog.preset} onClose={() => setDialog({ type: dialog.item ? "fixed-list" : "fixed-add" })}
+      onSaved={() => setDialog({ type: "fixed-list" })} /> : null}
   </div>;
 }
