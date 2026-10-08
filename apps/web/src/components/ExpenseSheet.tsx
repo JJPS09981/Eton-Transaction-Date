@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { splitInstallments } from "@budget/domain";
 import {
   getRecentDescriptions,
@@ -11,6 +11,7 @@ import {
 import { useCommandDraft } from "../lib/command";
 import { Sheet } from "./Sheet";
 import { CategoryIcon } from "./CategoryIcon";
+import { SubcategoryCreator } from "./SubcategoryCreator";
 
 type Props = {
   kind: "expense" | "income";
@@ -118,6 +119,8 @@ function QuickExpenseSheet({
   const [amount, setAmount] = useState(transaction?.amount ?? "");
   const [categoryId, setCategoryId] = useState(transaction?.category_id ?? "");
   const [subcategoryId, setSubcategoryId] = useState(transaction?.subcategory_id ?? "");
+  const [creatingSubcategory, setCreatingSubcategory] = useState(false);
+  const [addedSubcategories, setAddedSubcategories] = useState<Subcategory[]>([]);
   const [description, setDescription] = useState(transaction?.description ?? "");
   const [note, setNote] = useState(transaction?.note ?? "");
   const [source, setSource] = useState<"lifestyle" | "savings">(transaction?.funding_source ?? "lifestyle");
@@ -139,13 +142,22 @@ function QuickExpenseSheet({
   const [error, setError] = useState<string | null>(null);
   const dateRef = useRef<HTMLInputElement>(null);
   const amountRef = useRef<HTMLInputElement>(null);
+  const addSubcategoryRef = useRef<HTMLButtonElement>(null);
+  const subcategoryCreatorId = useId();
   const draft = useCommandDraft();
   const visible = categories.filter(item => item.scope === "daily" && (!item.hidden || item.id === transaction?.category_id))
     .map(item => item.id === transaction?.category_id ? { ...item, name: transaction.category ?? item.name } : item);
   const categoryChoices = !showMore && transaction?.category_id ? visible.filter((item, index) => index < 7 || item.id === transaction.category_id) : showMore ? visible : visible.slice(0, 7);
-  const choices = subcategories.filter(
+  const selectedCategory = visible.find((item) => item.id === categoryId);
+  const availableSubcategories = [...subcategories, ...addedSubcategories.filter((added) => !subcategories.some((item) => item.id === added.id))];
+  const choices = availableSubcategories.filter(
     (item) => item.category_id === categoryId && (!item.hidden || item.id === transaction?.subcategory_id),
-  ).map(item => item.id === transaction?.subcategory_id ? { ...item, name: transaction.subcategory ?? item.name } : item);
+  ).map(item => item.id === transaction?.subcategory_id ? { ...item, name: transaction.subcategory ?? item.name } : item)
+    .sort((a, b) => Number(a.name === "其他") - Number(b.name === "其他"));
+  const closeSubcategoryCreator = () => {
+    setCreatingSubcategory(false);
+    requestAnimationFrame(() => addSubcategoryRef.current?.focus({ preventScroll: true }));
+  };
   const historical = date < currentCycleStart;
   const effectiveSource = historical ? "savings" : source;
   let installments: bigint[] = [];
@@ -181,6 +193,7 @@ function QuickExpenseSheet({
   }, [categoryId, subcategoryId]);
   async function submit(event: FormEvent) {
     event.preventDefault();
+    if (creatingSubcategory) return;
     setError(null);
     if (!/^[0-9]+$/.test(amount) || BigInt(amount) <= 0n) {
       setError("請輸入大於 0 的整數金額");
@@ -272,6 +285,7 @@ function QuickExpenseSheet({
                     amountRef.current?.blur();
                     setCategoryId(item.id);
                     setSubcategoryId("");
+                    setCreatingSubcategory(false);
                   }}
                 >
                   <CategoryIcon name={item.icon_key} />
@@ -295,8 +309,7 @@ function QuickExpenseSheet({
               <legend>
                 細項 <span>選一個用途，之後更好找</span>
               </legend>
-              {choices.length ? (
-                <div className="expense-subcategories">
+              <div className="expense-subcategories">
                   {choices.map((item) => (
                     <button
                       type="button"
@@ -316,10 +329,18 @@ function QuickExpenseSheet({
                       {item.name}
                     </button>
                   ))}
-                </div>
-              ) : (
-                <p className="muted-note">可在設定中新增此分類的細項。</p>
-              )}
+                  {selectedCategory ? <button type="button" ref={addSubcategoryRef}
+                    className="subcategory-choice subcategory-add" aria-label={`新增${selectedCategory.name}細項`}
+                    aria-expanded={creatingSubcategory} aria-controls={subcategoryCreatorId}
+                    onClick={() => setCreatingSubcategory(!creatingSubcategory)}><span aria-hidden="true">＋</span></button> : null}
+              </div>
+              {creatingSubcategory && selectedCategory ? <SubcategoryCreator key={categoryId} id={subcategoryCreatorId}
+                category={selectedCategory} busy={busy} onSubmit={onSubmit} onCancel={closeSubcategoryCreator}
+                onSave={(subcategory) => {
+                  setAddedSubcategories((current) => [...current, subcategory]);
+                  setSubcategoryId(subcategory.id);
+                  closeSubcategoryCreator();
+                }} /> : null}
             </fieldset>
           ) : null}
           <label className="quick-section merchant-field">
@@ -519,7 +540,7 @@ function QuickExpenseSheet({
               {error}
             </p>
           ) : null}
-          <button className="primary-button" type="submit" disabled={busy}>
+          <button className="primary-button" type="submit" disabled={busy || creatingSubcategory}>
             {busy ? "儲存中…" : transaction ? "儲存修改" : "儲存支出"}
           </button>
         </div>
