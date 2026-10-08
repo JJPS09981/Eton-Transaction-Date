@@ -15,7 +15,7 @@ const data: DashboardData = {
   cycle: { income: "30000", fixed_expense_target: "0", fixed_expense_covered: "0", fixed_savings_target: "0",
     fixed_savings_actual: "0", lifestyle_budget: "30000" },
 };
-const actions = { onExpense: () => {}, onIncome: () => {}, onViewTransactions: () => {}, onEdit: () => {}, onDelete: () => {} };
+const actions = { onExpense: () => {}, onIncome: () => {}, onViewTransactions: () => {}, onEditBudget: () => {}, onEdit: () => {}, onDelete: () => {} };
 
 describe("today's dashboard", () => {
   it("shows every expense for today, excludes other dates and income, and keeps the extra-income entry", () => {
@@ -33,6 +33,7 @@ describe("today's dashboard", () => {
     expect(html).not.toContain("當日收入");
     expect(html).toContain("新增額外收入");
     expect(html).toContain("記一筆支出");
+    expect(html).toContain('aria-label="編輯本月可用預算"');
   });
 
   it("uses the state date when the dashboard date is absent and keeps income accessible on an empty day", () => {

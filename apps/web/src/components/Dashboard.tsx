@@ -13,11 +13,12 @@ function cycleDate(date: string): string {
   return year + "年" + Number(month) + "月" + Number(day) + "日";
 }
 
-export function Dashboard({ data, onExpense, onIncome, onViewTransactions, onEdit, onDelete, busy }: {
+export function Dashboard({ data, onExpense, onIncome, onViewTransactions, onEditBudget, onEdit, onDelete, busy }: {
   data: DashboardData;
   onExpense: () => void;
   onIncome: () => void;
   onViewTransactions: () => void;
+  onEditBudget: () => void;
 } & TransactionActions) {
   const state = data.state!;
   const cycle = data.cycle!;
@@ -41,7 +42,10 @@ export function Dashboard({ data, onExpense, onIncome, onViewTransactions, onEdi
     </section>
     <section className="balance-strip" aria-label="資金摘要">
       <div><span>本期存款池</span><strong>{money(state.P)}</strong><small>每日結餘累積於此</small></div>
-      <div><span>本月可用預算</span><strong>{money(cycle.lifestyle_budget)}</strong><small>扣除固定項目後</small></div>
+      <div><button className="budget-summary-button" type="button" disabled={busy} onClick={onEditBudget} aria-label="編輯本月可用預算" aria-haspopup="dialog">
+        <span className="budget-summary-label">本月可用預算<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15z" /></svg></span>
+        <strong>{money(cycle.lifestyle_budget)}</strong><small>扣除固定項目後</small>
+      </button></div>
     </section>
     <section className="list-panel dashboard-transactions">
       <div className="section-title"><h2>今日花費</h2><button className="inline-link" type="button" onClick={onViewTransactions}>查看歷史紀錄 <span aria-hidden="true">›</span></button></div>

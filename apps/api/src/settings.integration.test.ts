@@ -96,6 +96,91 @@ beforeEach(async () => {
   );
   await initialize();
 });
+
+describe("manual current-cycle budget on isolated PostgreSQL", () => {
+  const dashboard = async (today = "2026-10-07") => await readDashboard(env, user, today) as Record<string, any>;
+  const adjust = (data: Record<string, any>, target: string, extra: Record<string, unknown> = {}): Record<string, unknown> => ({
+    type: "AdjustCycleBudget", cycleId: data.state.cycleId, expectedVersion: data.state.version, target, ...extra,
+  });
+  const daily = (data: Record<string, any>) => BigInt(data.state.A) + Object.values(data.state.F).reduce<bigint>((sum, value) => sum + BigInt(value as string), 0n);
+
+  it("adjusts the persisted total only by its difference, preserves expenses and both savings, and retries once", async () => {
+    await command({ type: "AdjustSavings", target: "12000" });
+    await command({ type: "AddIncome", amount: "900", destination: "pool" });
+    await command({ type: "RecordExpense", amount: "150", source: "lifestyle", transactionDate: "2026-10-07" });
+    const before = await dashboard();
+    const raw = adjust(before, "8101", { commandId: crypto.randomUUID(), note: "校正生活預算" });
+    const result = await command(raw);
+    expect(result.difference).toBe("101");
+    expect(await command(raw)).toEqual(result);
+    const after = await dashboard();
+    expect(after.cycle).toMatchObject({ lifestyle_budget: "8101", income: "8000" });
+    expect(daily(after) - daily(before)).toBe(101n);
+    expect(after.state).toMatchObject({ P: before.state.P, S: before.state.S });
+    const events = (await pg.query<Record<string, any>>("select bucket,delta,note,reason from public.budget_events where command_id=$1", [raw.commandId])).rows;
+    expect(events).toHaveLength(3);
+    expect(events.every(event => (event.bucket === "A" || event.bucket === "F") && event.reason === "budget_adjustment" && event.note === "校正生活預算")).toBe(true);
+    const reduced = await command(adjust(after, "8040"));
+    expect(reduced.difference).toBe("-61");
+    const final = await dashboard();
+    expect(daily(final)).toBe(7890n);
+    expect(final.state).toMatchObject({ P: "900", S: "12000" });
+    expect((await readTransactions(env, user, null)).items).toHaveLength(1);
+    const unchanged = await command(adjust(final, "8040", { commandId: crypto.randomUUID() }));
+    expect(unchanged.difference).toBe("0");
+    expect(daily(await dashboard())).toBe(daily(final));
+  });
+
+  it("atomically rejects excessive reductions and preserves the target, daily funds, receipts and savings", async () => {
+    await command({ type: "RecordExpense", amount: "8000", source: "lifestyle", transactionDate: "2026-10-07" });
+    await command({ type: "AdjustSavings", target: "12000" });
+    await command({ type: "AddIncome", amount: "900", destination: "pool" });
+    const before = await dashboard();
+    const raw = adjust(before, "7999", { commandId: crypto.randomUUID() });
+    await expect(command(raw)).rejects.toThrow("減額超過");
+    const after = await dashboard();
+    expect(after.state).toEqual(before.state); expect(after.cycle).toEqual(before.cycle);
+    expect((await pg.query("select command_id from public.command_receipts where command_id=$1", [raw.commandId])).rows).toEqual([]);
+  });
+
+  it("rejects another account's cycle and a second edit from the same version", async () => {
+    await initialize(other);
+    const otherData = await readDashboard(env, other, "2026-10-07") as Record<string, any>;
+    const before = await dashboard();
+    await expect(command(adjust(before, "9000", { cycleId: otherData.state.cycleId }))).rejects.toThrow("本期預算已更新");
+    await command(adjust(before, "9000"));
+    await expect(command(adjust(before, "10000"))).rejects.toThrow("本期預算已更新");
+    expect((await dashboard()).cycle.lifestyle_budget).toBe("9000");
+  });
+
+  it("persists exact bigint targets and permits zero when the daily funds cover the reduction", async () => {
+    const maximum = "9223372036854775807";
+    await command(adjust(await dashboard(), maximum));
+    const large = await dashboard();
+    expect(large.cycle.lifestyle_budget).toBe(maximum);
+    expect(daily(large)).toBe(BigInt(maximum));
+    await command(adjust(large, "0"));
+    const zero = await dashboard();
+    expect(zero.cycle.lifestyle_budget).toBe("0"); expect(daily(zero)).toBe(0n);
+    expect(zero.state).toMatchObject({ P: "0", S: "0" });
+  });
+
+  it("keeps template adjustments separate, never carries the manual target into the next cycle, and preserves settlement history", async () => {
+    await command(adjust(await dashboard(), "9000"));
+    const income = (await pg.query<{ id: string }>("select id from public.recurring_items where user_id=$1 and kind='income'", [user])).rows[0]!;
+    await command({ type: "SaveFixedIncome", itemId: income.id, amount: "35000", apply: "current_cycle" });
+    expect((await dashboard()).cycle.lifestyle_budget).toBe("14000");
+    const before = await dashboard();
+    expect((await command(adjust(before, "14500"))).difference).toBe("500");
+    const stale = adjust(await dashboard(), "15000");
+    const next = await dashboard("2026-10-10");
+    expect(next.cycle.lifestyle_budget).toBe("34000");
+    const settlements = (await pg.query("select * from public.day_settlements where user_id=$1 order by date", [user])).rows;
+    await expect(command(stale, "2026-10-10")).rejects.toThrow("本期預算已更新");
+    expect((await pg.query("select * from public.day_settlements where user_id=$1 order by date", [user])).rows).toEqual(settlements);
+    expect((await dashboard("2026-10-10")).cycle.lifestyle_budget).toBe("34000");
+  });
+});
 describe("fixed income and starting savings on isolated PostgreSQL", () => {
   async function dashboard(today = "2026-10-07", userId = user) {
     return await readDashboard(env, userId, today) as Record<string, any>;

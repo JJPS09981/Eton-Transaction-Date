@@ -39,6 +39,7 @@ import {
 } from "./settings";
 import { dueInstallments, postReservedInstallments } from "./installments";
 import { correctTransaction } from "./transactions";
+import { saveCycleBudget } from "./cycle-budget";
 import { RequestError } from "./errors";
 export { RequestError } from "./errors";
 
@@ -615,6 +616,9 @@ export async function executeCommand(
           })),
         );
         response = { target: command.target.toString() };
+      } else if (command.type === "AdjustCycleBudget") {
+        const result = await saveCycleBudget(db, userId, state, command);
+        state = result.state; entries.push(...result.entries); response = result.response;
       } else if (command.type === "SaveFixedIncome") {
         const result = await saveFixedIncome(db, userId, state, command);
         state = result.state; entries.push(...result.entries); response = result.response;

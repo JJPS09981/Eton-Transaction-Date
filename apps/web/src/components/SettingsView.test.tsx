@@ -11,8 +11,10 @@ describe("financial settings and onboarding", () => {
       cycle: { income: "8000", fixed_expense_target: "0", fixed_expense_covered: "0", fixed_savings_target: "0", fixed_savings_actual: "0", lifestyle_budget: "8000" },
       recurring: [{ id: "income", kind: "income", name: "月薪", amount: "30000", active: true, frequency: "monthly", due_month: null, category: null }],
     };
-    const html = renderToStaticMarkup(<SettingsView data={data} busy={false} appearance={{ mode: "light", accent: "green" }} onAppearance={() => {}} onSubmit={async () => ({})} onSignOut={() => {}} />);
+    const html = renderToStaticMarkup(<SettingsView data={data} busy={false} appearance={{ mode: "light", accent: "green" }} onAppearance={() => {}} onSubmit={async () => ({})} onSignOut={() => {}} onEditBudget={() => {}} />);
     expect(html.indexOf("固定收入")).toBeLessThan(html.indexOf("固定支出"));
+    expect(html.indexOf("固定支出")).toBeLessThan(html.indexOf("本月可用預算"));
+    expect(html.indexOf("本月可用預算")).toBeLessThan(html.indexOf("本期週期"));
     expect(html).toContain("NT$ 30,000");
     const row = html.slice(html.indexOf("固定收入") - 120, html.indexOf("固定收入") + 190);
     expect(row).not.toContain('disabled=""');

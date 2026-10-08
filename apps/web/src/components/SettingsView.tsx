@@ -99,9 +99,10 @@ function FixedEditor({ item, preset, data, busy, onSubmit, onClose, onSaved }: E
 }
 
 type SettingsDialog = { type: "savings" | "categories" | "fixed-list" | "fixed-income" | "fixed-add" } | { type: "fixed-edit"; item: FixedItem | null; preset?: FixedExpenseInput };
-export function SettingsView({ data, busy, appearance, onAppearance, onSubmit, onSignOut }: {
+export function SettingsView({ data, busy, appearance, onAppearance, onSubmit, onSignOut, onEditBudget }: {
   data: DashboardData; busy: boolean; appearance: Appearance; onAppearance: (value: Appearance) => void;
   onSubmit: CommandHandler; onSignOut: () => void;
+  onEditBudget: () => void;
 }) {
   const [dialog, setDialog] = useState<SettingsDialog | null>(null);
   const fixed = data.recurring?.filter((item) => item.kind === "fixed_expense") ?? [];
@@ -115,6 +116,7 @@ export function SettingsView({ data, busy, appearance, onAppearance, onSubmit, o
       <button type="button" className="setting-row" disabled={busy} onClick={() => setDialog({ type: "savings" })}><span>累積存款<small>校正目前總額，保留調整紀錄</small></span><strong>{money(data.state!.S)} <i>›</i></strong></button>
       <button type="button" className="setting-row" disabled={busy || !income} onClick={() => setDialog({ type: "fixed-income" })}><span>固定收入<small>每月金額與生效時間</small></span><strong>{money(income?.amount)} <i>›</i></strong></button>
       <button type="button" className="setting-row" disabled={busy} onClick={() => setDialog({ type: "fixed-list" })}><span>固定支出<small>月繳、年繳與生效時間</small></span><strong className="fixed-expense-summary"><span>{data.fixedExpenseMonth ? `本月 ${money(data.fixedExpenseMonth.total)}` : "本月 —"}<small>{fixed.filter((item) => item.active).length} 個項目</small></span><i aria-hidden="true">›</i></strong></button>
+      <button type="button" className="setting-row" disabled={busy} onClick={onEditBudget}><span>本月可用預算<small>僅本期生效，調整每日額度</small></span><strong>{money(data.cycle!.lifestyle_budget)} <i aria-hidden="true">›</i></strong></button>
       <div className="setting-row"><span>本期週期</span><strong>{shortDate(data.state!.startDate)} – {shortDate(data.state!.endDate)}</strong></div>
       <div className="setting-row"><span>每月重置日</span><strong>{data.settings?.cycle_start_day ?? "—"} 日</strong></div>
       <div className="setting-row"><span>本期固定支出<small>已預留／目標</small></span><strong>{money(data.cycle!.fixed_expense_covered)} ／ {money(data.cycle!.fixed_expense_target)}</strong></div>

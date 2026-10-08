@@ -4,6 +4,7 @@ import { Dashboard } from "./components/Dashboard";
 import { GoogleSignIn } from "./components/GoogleSignIn";
 import { ExpenseSheet } from "./components/ExpenseSheet";
 import { DeleteTransactionSheet } from "./components/DeleteTransactionSheet";
+import { CycleBudgetEditor } from "./components/CycleBudgetEditor";
 import { RecordsView } from "./components/RecordsView";
 import { SettingsView } from "./components/SettingsView";
 import { SetupForm } from "./components/SetupForm";
@@ -20,6 +21,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [view, setView] = useState<View>("today");
   const [dialog, setDialog] = useState<"expense" | "income" | null>(null);
+  const [budgetEditorOpen, setBudgetEditorOpen] = useState(false);
   const [transactionAction, setTransactionAction] = useState<{ type: "edit" | "delete"; row: TransactionView } | null>(null);
   const [historyMonth, setHistoryMonth] = useState<string | null>(null);
   const [historyDate, setHistoryDate] = useState<string | null>(null);
@@ -41,7 +43,7 @@ export default function App() {
     return () => { active = false; };
   }, []);
   const expireSession = useCallback(() => {
-    setToken(null); setSession(null); setData(null); setDialog(null); setTransactionAction(null); setView("today");
+    setToken(null); setSession(null); setData(null); setDialog(null); setBudgetEditorOpen(false); setTransactionAction(null); setView("today");
     setHistoryMonth(null); setHistoryDate(null); setError(null);
   }, []);
   const reload = useCallback(async () => {
@@ -72,6 +74,10 @@ export default function App() {
       return result;
     } catch (caught) {
       if (caught instanceof ApiError && caught.status === 401) expireSession();
+      if (caught instanceof ApiError && caught.status === 409 && body.type === "AdjustCycleBudget") {
+        try { setData(await getDashboard()); }
+        catch { /* Keep the draft and conflict message if loading the latest budget fails. */ }
+      }
       setError(caught instanceof Error ? caught.message : "儲存失敗");
       throw caught;
     } finally { setBusy(false); }
@@ -86,10 +92,11 @@ export default function App() {
   const actions = { busy, onEdit: (row: TransactionView) => setTransactionAction({ type: "edit", row }), onDelete: (row: TransactionView) => setTransactionAction({ type: "delete", row }) };
   return <Shell view={view} onView={setView}>
     {error ? <div className="banner error-message" role="alert">{error}<div><button type="button" onClick={() => void reload()}>重整</button><button type="button" onClick={() => setError(null)} aria-label="關閉錯誤">×</button></div></div> : null}
-    {view === "today" ? <Dashboard data={data} {...actions} onExpense={() => setDialog("expense")} onIncome={() => setDialog("income")} onViewTransactions={() => { setHistoryDate(null); setView("transactions"); }} /> : null}
+    {view === "today" ? <Dashboard data={data} {...actions} onEditBudget={() => setBudgetEditorOpen(true)} onExpense={() => setDialog("expense")} onIncome={() => setDialog("income")} onViewTransactions={() => { setHistoryDate(null); setView("transactions"); }} /> : null}
     {view === "transactions" ? <RecordsView data={data} {...actions} month={historyMonth ?? today.slice(0, 7)} selectedDate={historyDate} onMonth={setHistoryMonth} onDate={setHistoryDate} onExpense={() => setDialog("expense")} /> : null}
     {view === "data" ? <DataView data={data} /> : null}
-    {view === "settings" ? <SettingsView data={data} busy={busy} appearance={appearance} onAppearance={setAppearance} onSubmit={command} onSignOut={expireSession} /> : null}
+    {view === "settings" ? <SettingsView data={data} busy={busy} appearance={appearance} onAppearance={setAppearance} onSubmit={command} onSignOut={expireSession} onEditBudget={() => setBudgetEditorOpen(true)} /> : null}
+    {budgetEditorOpen ? <CycleBudgetEditor data={data} busy={busy} onSubmit={command} onClose={() => setBudgetEditorOpen(false)} /> : null}
     {dialog ? <ExpenseSheet kind={dialog} today={today} initialDate={view === "transactions" && historyDate ? historyDate : today} currentCycleStart={data.state!.startDate} categories={data.categories ?? []} subcategories={data.subcategories ?? []} busy={busy} onClose={() => setDialog(null)} onSubmit={command} /> : null}
     {transactionAction?.type === "edit" ? <ExpenseSheet key={transactionAction.row.id} kind={transactionAction.row.kind} transaction={transactionAction.row} today={today} currentCycleStart={data.state!.startDate} categories={data.categories ?? []} subcategories={data.subcategories ?? []} busy={busy} onClose={() => setTransactionAction(null)} onSubmit={command} /> : null}
     {transactionAction?.type === "delete" ? <DeleteTransactionSheet key={transactionAction.row.id} transaction={transactionAction.row} busy={busy} onClose={() => setTransactionAction(null)} onSubmit={command} /> : null}

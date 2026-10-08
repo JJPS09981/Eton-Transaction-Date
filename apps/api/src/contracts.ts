@@ -142,6 +142,11 @@ export const commandSchema = z.discriminatedUnion("type", [
       apply: z.enum(["next_cycle", "current_cycle"]).default("next_cycle"),
     })
     .strict(),
+  base.extend({
+    type: z.literal("AdjustCycleBudget"), cycleId: z.uuid(),
+    expectedVersion: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER),
+    target: money, note: z.string().trim().max(500).optional(),
+  }).strict(),
   base
     .extend({
       type: z.literal("SaveFixedExpense"),

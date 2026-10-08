@@ -353,6 +353,51 @@ export function adjustSavings(stateBefore: BudgetState, target: bigint): Transit
   return { state, events: delta === 0n ? [] : [{ bucket: "S", delta, reason: "savings_adjustment" }] };
 }
 
+export function adjustCycleBudget(input: {
+  state: BudgetState; previousTarget: bigint; target: bigint;
+}): Transition {
+  requireNonnegative(input.previousTarget, "previous budget");
+  requireNonnegative(input.target, "budget target");
+  assertState(input.state);
+  const state = { ...input.state, F: { ...input.state.F } };
+  const difference = input.target - input.previousTarget;
+  if (difference === 0n) return { state, events: [] };
+  const dates = datesInclusive(state.today, state.endDate);
+  const before = Object.fromEntries(dates.map(date => [date, date === state.today ? state.A : state.F[date] ?? 0n]));
+  const after = { ...before };
+  if (difference > 0n) {
+    const increments = distribute(difference, dates);
+    for (const date of dates) after[date] = before[date]! + increments[date]!;
+    state.insufficientFunds = false;
+  } else {
+    let remaining = -difference;
+    if (remaining > Object.values(before).reduce((sum, value) => sum + value, 0n))
+      throw new RangeError("budget reduction exceeds remaining daily budget");
+    let active = dates.filter(date => after[date]! > 0n);
+    while (remaining > 0n) {
+      const deductions = distribute(remaining, active);
+      const capped = active.filter(date => deductions[date]! > after[date]!);
+      if (capped.length === 0) {
+        for (const date of active) after[date] = after[date]! - deductions[date]!;
+        remaining = 0n;
+      } else {
+        for (const date of capped) { remaining -= after[date]!; after[date] = 0n; }
+        active = active.filter(date => after[date]! > 0n);
+      }
+    }
+  }
+  const events: MoneyEvent[] = [];
+  for (const date of dates) {
+    const delta = after[date]! - before[date]!;
+    if (date === state.today) state.A = after[date]!;
+    else state.F[date] = after[date]!;
+    if (delta !== 0n) events.push({ bucket: date === state.today ? "A" : "F",
+      ...(date === state.today ? {} : { date }), delta, reason: "budget_adjustment" });
+  }
+  assertState(state);
+  return { state, events };
+}
+
 // The first cycle starts from a net budget, not the full monthly income.
 // Frozen bases keep later template edits from changing the correction baseline.
 export function fixedIncomeTarget(amount: bigint, templateBase: bigint, budgetBase: bigint): bigint {

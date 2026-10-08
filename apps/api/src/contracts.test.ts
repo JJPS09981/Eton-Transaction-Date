@@ -4,6 +4,15 @@ import { parseCommand, stableStringify } from "./contracts";
 const commandId = "75a585b7-cf24-4d08-b740-bcc861118c53";
 
 describe("API command validation", () => {
+  it("validates absolute cycle budget targets, guarded cycle identity and state version", () => {
+    const raw = { type: "AdjustCycleBudget", commandId, cycleId: commandId, expectedVersion: 1, target: "0" };
+    expect(parseCommand(raw)).toMatchObject({ target: 0n, expectedVersion: 1 });
+    expect(parseCommand({ ...raw, target: "9223372036854775807" })).toMatchObject({ target: 9_223_372_036_854_775_807n });
+    for (const target of ["-1", "1.5", "01", "9223372036854775808"])
+      expect(() => parseCommand({ ...raw, target })).toThrow();
+    expect(() => parseCommand({ ...raw, expectedVersion: -1 })).toThrow();
+    expect(() => parseCommand({ ...raw, cycleId: "not-a-cycle" })).toThrow();
+  });
   it("accepts guided setup with named fixed expenses and a separate first-cycle budget", () => {
     const command = parseCommand({
       type: "Initialize",
