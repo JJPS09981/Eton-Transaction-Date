@@ -59,6 +59,14 @@ V1.0.0 以核心日常記帳與固定存款穩定為發布標準；外幣、獨�
 
 - 可登記多個實際帳戶餘額、忽略差異或留下原因調整；需先定義固定支出預留與尚未實際付款的比較基準。不得把 `A+F+P+S+T` 直接宣稱等於銀行現金總額；所有負向調整維持非負與原子性。
 
+### 後續安全強化 — Session Cookie 與 CSRF 防護（未排定版本）
+
+- **目前狀態**：本站 session JWT 仍儲存在前端 `localStorage`，API 透過 `Authorization: Bearer` 驗證；本項是安全性改善規劃，**尚未實作，也不阻擋 v1.0.0 發布**。
+- 評估將 session 改為 `HttpOnly`、`Secure`、適當 `SameSite` 屬性的 Cookie，並依 Pages／Worker 實際跨 Origin、同 Site 部署方式確認 Cookie Domain、Path、CORS 與 `credentials` 設定；不要直接照搬 Bearer Token 流程。
+- Cookie 自動隨請求送出後，所有會變更資料的請求須設計 CSRF 保護，例如驗證 `Origin`／`Referer`、搭配 CSRF Token 或其他適用機制；`SameSite` 不可作為唯一的跨情境防線。登入、登出與 session 更新流程也須納入。
+- 規劃 session 期限、登出撤銷及舊 `localStorage` Token 的安全遷移；避免將 JWT 放入 JavaScript 可讀取的 Cookie、URL 或日誌。明確認知 `HttpOnly` 只能降低 Token 被腳本直接讀取的風險，不能取代 XSS 防護。
+- **驗收條件**：跨瀏覽器與手機 PWA 登入／重新整理／過期／登出正常；跨站偽造寫入被拒絕；受允許的正式網站可正常呼叫 API，其他來源不可；登入與修改資金命令的 RLS、冪等、原子性與回歸測試保持通過。完成前保持既有登入機制，不做半套遷移。
+
 ## 已實作功能與回歸依據（v0.9.0 基準）
 
 以下是程式現況摘要，不是重新開發的待辦；若與程式碼不同，以當前 Domain、API contracts、migration 為準，並先修訂規格。
