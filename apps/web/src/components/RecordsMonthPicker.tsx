@@ -14,7 +14,7 @@ export function RecordsMonthPicker({ month, today, onSelect, onClose }: {
   return <Sheet title="選擇年月" className="records-month-picker" onClose={onClose}>
     <p className="sheet-description">選擇年份，再點月份切換月曆。</p>
     <label className="field"><span>年份</span>
-      <select data-autofocus aria-label="年份" value={year} onChange={(event) => setYear(Number(event.target.value))}>
+      <select aria-label="年份" value={year} onChange={(event) => setYear(Number(event.target.value))}>
         {Array.from({ length: currentYear - 1900 + 1 }, (_, index) => currentYear - index).map((value) => <option key={value} value={value}>{value} 年</option>)}
       </select>
     </label>
