@@ -276,9 +276,18 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline-color:
 .inline-create .field { flex: 1; min-width: 0; margin-bottom: 0; }
 .inline-create .secondary-button { flex: none; min-height: 47px; }
 .calendar-panel { border-bottom: 1px solid var(--line); padding-bottom: 22px; margin-bottom: 28px; }
-.calendar-heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 20px; }
+.calendar-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 20px; }
 .calendar-heading h2 { font-size: 20px; margin: 0; }
-.calendar-actions { display: flex; align-items: center; gap: 6px; }
+.calendar-actions { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+.month-picker-trigger { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; border: 0; padding: 0; background: transparent; color: var(--text); font: inherit; font-weight: 700; }
+.month-picker-trigger svg { width: 16px; height: 16px; color: var(--muted); }
+.edit-sheet.records-month-picker { width: min(420px, calc(100% - 32px)); }
+.month-picker-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.month-picker-choice { min-height: 48px; padding: 10px; border: 1px solid transparent; border-radius: 9px; background: var(--surface-muted); color: var(--text); font-size: 15px; }
+.month-picker-choice:hover:not(:disabled), .month-picker-choice.selected { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-strong); }
+.month-picker-choice:disabled { cursor: default; }
+.month-picker-current { width: 100%; min-height: 44px; margin-top: 20px; font-size: 14px; }
+.records-month-picker :is(button, select):focus-visible, .month-picker-trigger:focus-visible { outline: 1px solid var(--accent); outline-offset: 1px; }
 .month-arrow { width: 40px; height: 40px; background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: 7px; font-size: 27px; line-height: 1; }
 .calendar-weekdays, .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
 .calendar-weekdays { color: var(--muted); text-align: center; font-size: 12px; margin-bottom: 7px; }

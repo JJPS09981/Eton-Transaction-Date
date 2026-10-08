@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getCalendar, money, shortDate, type CalendarData, type DashboardData, type TransactionView } from "../lib/api";
 import { useHistory } from "../lib/useHistory";
 import { TransactionRows, type TransactionActions } from "./Dashboard";
+import { RecordsMonthPicker } from "./RecordsMonthPicker";
 
 function moveMonth(month: string, offset: number) {
   const date = new Date(Date.UTC(Number(month.slice(0, 4)), Number(month.slice(5, 7)) - 1 + offset, 1));
@@ -31,10 +32,20 @@ export function RecordsView({ data, month, selectedDate, onMonth, onDate, onExpe
   const [calendar, setCalendar] = useState<CalendarData | null>(null);
   const [calendarError, setCalendarError] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
+  const [monthPickerOpen, setMonthPickerOpen] = useState(false);
+  const monthTriggerRef = useRef<HTMLButtonElement>(null);
+  const closeMonthPicker = () => {
+    setMonthPickerOpen(false);
+    requestAnimationFrame(() => monthTriggerRef.current?.focus({ preventScroll: true }));
+  };
+  const changeMonth = (nextMonth: string) => {
+    onMonth(nextMonth);
+    onDate(null);
+  };
   useEffect(() => {
     const abort = new AbortController();
     setCalendar(null); setCalendarError(null);
-    void getCalendar(month, abort.signal).then(setCalendar).catch((caught: unknown) => {
+    void getCalendar(month, abort.signal).then((result) => { if (!abort.signal.aborted) setCalendar(result); }).catch((caught: unknown) => {
       if (!abort.signal.aborted) setCalendarError(caught instanceof Error ? caught.message : "月曆讀取失敗");
     });
     return () => abort.abort();
@@ -48,10 +59,13 @@ export function RecordsView({ data, month, selectedDate, onMonth, onDate, onExpe
   return <div className="detail-page">
     <header className="page-heading"><div><h1>紀錄</h1><p>從今天往前，查看每一筆花費。</p></div><button className="secondary-button" type="button" onClick={onExpense}>記一筆</button></header>
     <section className="calendar-panel" aria-label="花費月曆">
-      <div className="calendar-heading"><h2>{year} 年 {monthNumber} 月</h2><div className="calendar-actions">
-        {month !== today.slice(0, 7) ? <button className="inline-link" type="button" onClick={() => onMonth(today.slice(0, 7))}>回到本月</button> : null}
-        <button className="month-arrow" type="button" aria-label="上一個月" disabled={month === "1900-01"} onClick={() => onMonth(moveMonth(month, -1))}>‹</button>
-        <button className="month-arrow" type="button" aria-label="下一個月" disabled={month >= today.slice(0, 7)} onClick={() => onMonth(moveMonth(month, 1))}>›</button>
+      <div className="calendar-heading"><h2><button ref={monthTriggerRef} type="button" className="month-picker-trigger"
+        aria-haspopup="dialog" aria-expanded={monthPickerOpen} aria-label={`${year} 年 ${monthNumber} 月，選擇年月`} onClick={() => setMonthPickerOpen(true)}>
+        {year} 年 {monthNumber} 月<svg aria-hidden="true" viewBox="0 0 16 16" fill="none"><path d="m4 6 4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+      </button></h2><div className="calendar-actions">
+        {month !== today.slice(0, 7) ? <button className="inline-link" type="button" onClick={() => changeMonth(today.slice(0, 7))}>回到本月</button> : null}
+        <button className="month-arrow" type="button" aria-label="上一個月" disabled={month === "1900-01"} onClick={() => changeMonth(moveMonth(month, -1))}>‹</button>
+        <button className="month-arrow" type="button" aria-label="下一個月" disabled={month >= today.slice(0, 7)} onClick={() => changeMonth(moveMonth(month, 1))}>›</button>
       </div></div>
       <div className="calendar-weekdays" aria-hidden="true">{["一", "二", "三", "四", "五", "六", "日"].map((day) => <span key={day}>{day}</span>)}</div>
       <div className="calendar-grid">
@@ -82,5 +96,7 @@ export function RecordsView({ data, month, selectedDate, onMonth, onDate, onExpe
       {history.error ? <p className="error-message" role="alert">{history.error}</p> : null}
       {history.cursor || history.error ? <button type="button" className="secondary-button history-more" disabled={history.loading} onClick={() => void history.more()}>{history.loading ? "載入中…" : history.error ? "重試" : "載入更多"}</button> : null}
     </section>
+    {monthPickerOpen ? <RecordsMonthPicker month={month} today={today} onClose={closeMonthPicker}
+      onSelect={(nextMonth) => { changeMonth(nextMonth); closeMonthPicker(); }} /> : null}
   </div>;
 }
