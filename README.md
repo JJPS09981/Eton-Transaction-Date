@@ -100,3 +100,7 @@ v0.3.0 發布時 55 項自動測試通過（24 Domain、29 API／認證／Postgr
 102 項測試（35 Domain、51 API、16 Web）、完整型別與正式建置通過。Chromium 隔離資料驗證年／月切換、取消、年份邊界、閏年主月曆、日期篩選清除，以及 320／390／1280px、深色模式與 1px 焦點外框。本次無資料庫 migration，未在正式帳戶寫入測試交易。
 
 正式版本與資產檢查均通過：前端與 API 為 0.8.0、HTTP 200、JS／CSS SHA-256 一致、CORS 預檢 204、匿名摘要 401。Pages deployment 為 `978ba48c`，Worker version ID 為 `fa9bad94-db21-44b0-9218-222438ff8769`。
+
+**v0.8.1 已於 2026-10-08 部署至正式站。** 年月選單開啟時移除年份欄位的自動聚焦；年份仍可透過點擊及 Tab 選擇，關閉後焦點返回月份標題。16 項前端測試、完整建置與 Chromium 隔離資料的滑鼠／鍵盤開啟、選月及焦點返回驗證通過。本次無資料庫 migration。
+
+焦點修正提交 `639a204` 已推至 main；隔離發佈分支為 `codex/month-picker-focus`，使用 v0.8.0 加上此次修正及 v0.8.1 版本資訊建置。正式版本與資產檢查均通過：前端與 API 為 0.8.1、HTTP 200、JS／CSS SHA-256 一致、CORS 預檢 204、匿名摘要 401。Pages deployment 為 `4e68146d`，Worker version ID 為 `a88716a7-9db7-434e-a31a-21f525837ddd`。
